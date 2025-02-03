@@ -5,6 +5,8 @@ struct Home: View {
     
     let persistence = PersistenceController.shared
     
+    @Binding var isLoggedin: Bool
+    
     var body: some View {
         Header()
         
@@ -13,7 +15,7 @@ struct Home: View {
                 .tabItem({Label("Menu", systemImage: "list.dash")})
                 .navigationBarTitle("Menu")
                 .frame(alignment:.top)
-            UserProfile()
+            UserProfile(isLoggedin : $isLoggedin)
                 .tabItem({Label("Profile", systemImage: "square.and.pencil")})
                 .navigationBarTitle("Profile")
         }
@@ -25,5 +27,5 @@ struct Home: View {
 }
 
 #Preview {
-    Home()
+
 }

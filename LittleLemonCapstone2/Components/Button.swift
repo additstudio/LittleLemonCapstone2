@@ -9,7 +9,7 @@ struct CustomButtonStyle: ButtonStyle {
             .foregroundColor(.white)
             .background(
                 Rectangle()
-                    .background(Color.green)
+                    .background(Color.white)
                     .cornerRadius(12)
             )
             .padding(.horizontal, 10) // *margin of 10px on each side*
