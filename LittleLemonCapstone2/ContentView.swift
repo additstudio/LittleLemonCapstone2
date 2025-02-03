@@ -9,10 +9,12 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
+    
+    @State var isLoggedin : Bool  = UserDefaults.standard.bool(forKey: "isLoggedInKey")
 
         var body: some View {
         NavigationStack {
-            Onboarding()
+           Onboarding(isLoggedin: $isLoggedin)
         }
         .navigationBarBackButtonHidden(true)
     }

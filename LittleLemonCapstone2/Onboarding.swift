@@ -6,12 +6,13 @@ struct Onboarding: View {
     @State var lastName:String = ""
     @State var email:String=""
     @State var showAlert:Bool = false
-    @State var isLoggedin = false
-    
+    @Binding var isLoggedin : Bool
+
     @FocusState private var focus: formFieldFocus?
     
     var defaults = UserDefaults.standard
     
+
     enum formFieldFocus: Hashable {
         case firstName, lastName, email;
     }
@@ -23,8 +24,7 @@ struct Onboarding: View {
     }
     
     @State var errorMessage: String = ""
-    @State var successMessage: String = ""
-    
+
     func validateInfo(firstName: String, lastName: String, email: String) throws {
         if firstName.isEmpty {
             throw validateInfoError.firstNameEmpty
@@ -37,9 +37,10 @@ struct Onboarding: View {
         }
         else {
             defaults.set(firstName, forKey: "FirstNameKey")
-            defaults.set(lastName, forKey: "kLastNameKey")
+            defaults.set(lastName, forKey: "LastNameKey")
             defaults.set(email, forKey: "EmailKey")
-            isLoggedin=true
+            isLoggedin = true
+            defaults.set(true, forKey: "isLoggedInKey")
         }
     }
     
@@ -70,7 +71,7 @@ struct Onboarding: View {
     
     var body: some View {
         
-        NavigationView{
+        NavigationStack{
             VStack{
                 Image("littleLemonLogo_full")
                     .resizable()
@@ -98,20 +99,28 @@ struct Onboarding: View {
                 .textFieldStyle(.roundedBorder)
                 .padding()
                 
+                    Button("Login"){
+                        submit()
+                    }
+                    .alert(isPresented: $showAlert) {
+                        Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+                    }
+                    .buttonStyle(CustomButtonStyle())
+                    .frame(width:300, height: 50)
+                    .foregroundStyle(.llGreen)
+                    .navigationDestination(isPresented: $isLoggedin) { Home(isLoggedin : $isLoggedin)}
+                    .navigationBarBackButtonHidden(true)
                 
-                Button("Login"){
-                    submit()
-                }
-                .alert(isPresented: $showAlert) {
-                    Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
-                }
-                .buttonStyle(CustomButtonStyle())
-                .frame(width:300, height: 50)
                 
             }
+
         }
-        .navigationDestination(isPresented: $isLoggedin) { Home()}
-        
+
     }
+    
 }
+
+#Preview {
+ }
+
 

@@ -6,6 +6,7 @@ struct Menu: View {
     
     @Environment(\.managedObjectContext) private var viewContext
     @State var searchText: String = ""
+    @State var searchCategory: String = ""
     
     func getMenuData () {
         
@@ -25,11 +26,19 @@ struct Menu: View {
                         newDish.title = $0.title
                         newDish.price = $0.price
                         newDish.image = $0.image
+                        newDish.desc = $0.desc
+                        newDish.category = $0.category
                    }
                 try? viewContext.save()
             }
         }
         task.resume()
+    }
+    
+    enum MenuCategory: String, CaseIterable {
+        case starters = "Starters"
+        case mains = "Main"
+        case desserts = "Desserts"
     }
     
     
@@ -59,7 +68,7 @@ struct Menu: View {
                         
                         Image("heroImage")
                             .resizable()
-                            .scaledToFit()
+                            .scaledToFill()
                             .frame(width:180, height: 200, alignment: .trailing)
                             .cornerRadius(CGFloat(20))
                         
@@ -68,26 +77,51 @@ struct Menu: View {
                     TextField("Search menu...", text: $searchText)
                         .padding()
                         .font(.system(size: 18))
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(style: StrokeStyle(lineWidth: 1)))
-                        .foregroundColor(.llGray)
+                        .foregroundColor(.black)
                         .frame(width: 380, height: 40)
+                        .background(Color.llGray.opacity(0.8))
+                    
                 }
             }
             .frame(height: 360, alignment: .topLeading)
+            VStack (alignment: .leading){
+                Text("ORDER FOR DELIVERY")
+                    .font(.system(size: 15, weight: .bold))
+                HStack (alignment: .center) {
+                    ForEach(MenuCategory.allCases, id:\.self) { category in
+                        Button("\(category.rawValue)") {
+                            selectCategory(category: category.rawValue)
+
+                            
+                        }
+                            .buttonStyle(CategoryButtonStyle())
+                            .foregroundStyle(searchCategory == category.rawValue ? .llYellow : .llGray)
+                    }
+                }
+            }
+                .frame(height: 50, alignment: .leading)
+                .padding(5)
+                
             
-            
-            
-            FetchedObjects(predicate: buildPredicate(searchText: searchText), sortDescriptors: buildSortDescriptors()) { (dishes:[Dish]) in
+            FetchedObjects(predicate: NSCompoundPredicate(type:.and, subpredicates: [buildPredicate(searchText: searchText), categoryPredicate(searchCategory: searchCategory)]), sortDescriptors: buildSortDescriptors()) { (dishes:[Dish]) in
                 List {
+                    
                     ForEach(dishes) { dish in
+                        
                         let imageURL = dish.image ?? ""
+                        
                         HStack {
                             VStack (alignment: .leading){
                                 Text(dish.title ?? "")
                                     .font(.system(size: 18, weight: .bold))
                                     .multilineTextAlignment(TextAlignment.leading)
+                                    .padding(.bottom,5)
+                                Text(dish.desc ?? "")
+                                    .font(.system(size: 12, weight: .regular))
+                                    .multilineTextAlignment(TextAlignment.leading)
+                                    .padding(.bottom,10)
                                 Text("$ \(dish.price ?? "")")
-                                    .font(.system(size: 18))
+                                    .font(.system(size: 16, weight: .bold))
                                     .multilineTextAlignment(TextAlignment.leading)
                             }
                             Spacer()
@@ -96,18 +130,18 @@ struct Menu: View {
                                     .resizable()
                             }
                             .frame(width: 100, height: 100, alignment: .trailing)
-
-                            
                         }
+                        
+                        
                     }
                 }
-                .searchable(text: $searchText, prompt: Text("Search menu.."))
-                
-                
-                
-            }
+                }
+            
+        
+    
         }
         .onAppear(perform: getMenuData)
+
     }
     
     
@@ -120,8 +154,22 @@ struct Menu: View {
         }
     }
     
+    private func categoryPredicate (searchCategory: String) -> NSPredicate {
+        
+        if searchCategory.isEmpty {
+            return NSPredicate(value: true)
+        } else {
+            return NSPredicate(format: "category CONTAINS[cd] %@", searchCategory)
+        }
+    }
+    
     private func buildSortDescriptors () -> [NSSortDescriptor] {
         return [NSSortDescriptor(key: "title", ascending: true, selector: #selector(NSString.localizedStandardCompare))]
+    }
+    
+    private func selectCategory (category: String) {
+
+        if searchCategory == category { searchCategory = "" } else {searchCategory = category}
     }
 }
 

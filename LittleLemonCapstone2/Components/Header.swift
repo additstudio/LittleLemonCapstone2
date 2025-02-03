@@ -7,6 +7,7 @@ struct Header: View {
             .scaledToFit()
             .frame(width: 150, height: 50)
     }
+
 }
 
 #Preview {
